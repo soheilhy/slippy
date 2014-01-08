@@ -73,13 +73,19 @@ __LEXERS = {
 
 def highlight(snippet, lang):
   ''' snippet is the string of code snippets, and lang, the language name. '''
-  if not __LEXERS.get(lang):
-    print('Language %s is not supported.' % lang)
-    return snippet
+  # The highlighter highlights (i.e., adds tags around) operators
+  # (& and ;, here), so let's use a non-highlighted keyword, and escape them
+  # after highlighting.
+  snippet = snippet.replace("&", "__AMP__").replace("<", "__LT__")
 
-  return pygments.highlight(snippet, __LEXERS[lang](), PangoFormatter())
+  if __LEXERS.get(lang):
+    snippet = pygments.highlight(snippet, __LEXERS[lang](), PangoFormatter())
+  else:
+    print("Language %s is not supported." % lang)
+
+  return snippet.replace("__AMP__", "&amp;").replace("__LT__", "&lt;")
 
 if __name__ == '__main__':
   code = 'print "Hello World"'
-  print highlight(code, 'python')
+  print highlight(code, 'py')
 
